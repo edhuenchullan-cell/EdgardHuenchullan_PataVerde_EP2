@@ -37,7 +37,7 @@
     <bottom>
         <HBox spacing="10.0" alignment="CENTER_LEFT">
             <padding><Insets top="10.0" right="15.0" bottom="15.0" left="15.0" /></padding>
-            <Button fx:id="btnRegistrar" text="Registrar mascota" />
+            <Button fx:id="btnRegistrar" text="Registrar mascota" onAction="#abrirFormulario" />
             <Button fx:id="btnEliminar" text="Eliminar seleccionada" />
             <Label fx:id="lblMensaje" />
         </HBox>
