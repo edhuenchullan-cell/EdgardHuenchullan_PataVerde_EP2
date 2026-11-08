@@ -1,4 +1,28 @@
 {
-  "perros": [],
-  "gatos": []
+  "perros": [
+    {
+      "raza": "quiltro",
+      "vacunado": true,
+      "disponibleAdopcion": false,
+      "nombre": "luffy",
+      "edad": 10,
+      "peso": 12.0
+    },
+    {
+      "raza": "quiltro",
+      "vacunado": false,
+      "disponibleAdopcion": false,
+      "nombre": "copo",
+      "edad": 10,
+      "peso": 8.0
+    }
+  ],
+  "gatos": [
+    {
+      "exterior": true,
+      "nombre": "tomy",
+      "edad": 10,
+      "peso": 4.0
+    }
+  ]
 }
