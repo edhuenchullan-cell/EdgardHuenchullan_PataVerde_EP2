@@ -5,6 +5,7 @@ import cl.duoc.pataverde.dao.MascotaRepository;
 import cl.duoc.pataverde.model.Mascota;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -12,6 +13,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -26,9 +28,11 @@ public class MainController {
     @FXML private TableColumn<Mascota, Integer> colEdad;
     @FXML private TableColumn<Mascota, Double> colPeso;
     @FXML private Label lblMensaje;
+    @FXML private TextField txtBuscar;
 
     private final MascotaRepository repositorio = new MascotaRepository(new MascotaDAOJson());
     private final ObservableList<Mascota> mascotas = FXCollections.observableArrayList();
+    private final FilteredList<Mascota> mascotasFiltradas = new FilteredList<>(mascotas);   // NUEVO
 
     @FXML
     private void initialize() {
@@ -38,9 +42,44 @@ public class MainController {
         colPeso.setCellValueFactory(new PropertyValueFactory<>("peso"));
 
         mascotas.setAll(repositorio.listar());
-        tblMascotas.setItems(mascotas);
+        tblMascotas.setItems(mascotasFiltradas);
+
+
+        txtBuscar.textProperty().addListener((obs, anterior, nuevo) -> filtrar(nuevo));
 
         lblMensaje.setText("Se cargaron " + mascotas.size() + " mascotas.");
+    }
+
+    // NUEVO
+    private void filtrar(String texto) {
+        String criterio = texto.trim().toLowerCase();
+
+        mascotasFiltradas.setPredicate(mascota -> {
+            if (criterio.isEmpty()) {
+                return true;
+            }
+            String nombre = mascota.getNombre().toLowerCase();
+            String tipo = mascota.getTipo().toLowerCase();
+            return nombre.contains(criterio) || tipo.contains(criterio);
+        });
+
+        lblMensaje.setStyle("");
+        lblMensaje.setText("Mostrando " + mascotasFiltradas.size() + " de " + mascotas.size() + " mascotas.");
+    }
+
+    // NUEVO
+    @FXML
+    private void eliminar() {
+        Mascota seleccionada = tblMascotas.getSelectionModel().getSelectedItem();
+
+        if (seleccionada == null) {
+            mostrarError("Selecciona una mascota de la tabla para eliminarla.");
+            return;
+        }
+
+        repositorio.eliminar(seleccionada);
+        mascotas.remove(seleccionada);
+        mostrarExito("Se eliminó a " + seleccionada.getNombre() + " (" + seleccionada.getTipo() + ").");
     }
 
     @FXML

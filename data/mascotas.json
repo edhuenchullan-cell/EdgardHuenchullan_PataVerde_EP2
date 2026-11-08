@@ -1,13 +1,4 @@
 {
-  "perros": [
-    {
-      "raza": "quiltro",
-      "vacunado": true,
-      "disponibleAdopcion": false,
-      "nombre": "luffy",
-      "edad": 10,
-      "peso": 15.0
-    }
-  ],
+  "perros": [],
   "gatos": []
 }
