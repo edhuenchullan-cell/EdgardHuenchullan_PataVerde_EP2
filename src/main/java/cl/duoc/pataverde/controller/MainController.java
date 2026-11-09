@@ -1,13 +1,11 @@
 package cl.duoc.pataverde.controller;
 
 import cl.duoc.pataverde.dao.MascotaDAOJson;
-import cl.duoc.pataverde.dao.MascotaRepository;
 import cl.duoc.pataverde.model.Gato;
 import cl.duoc.pataverde.model.Mascota;
 import cl.duoc.pataverde.model.Perro;
+import cl.duoc.pataverde.repository.MascotaRepository;          // CAMBIO: nuevo paquete
 import javafx.beans.property.SimpleStringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
@@ -43,12 +41,11 @@ public class MainController {
     @FXML private Label lblMensaje;
 
     private final MascotaRepository repositorio = new MascotaRepository(new MascotaDAOJson());
-    private final ObservableList<Mascota> mascotas = FXCollections.observableArrayList();
-    private final FilteredList<Mascota> mascotasFiltradas = new FilteredList<>(mascotas);
+    // CAMBIO: ya no hay una ObservableList propia; el filtro se pone sobre la lista del Repository
+    private final FilteredList<Mascota> mascotasFiltradas = new FilteredList<>(repositorio.getMascotas());
 
     @FXML
     private void initialize() {
-        // 1. Columnas de la tabla
         colTipo.setCellValueFactory(new PropertyValueFactory<>("tipo"));
         colNombre.setCellValueFactory(new PropertyValueFactory<>("nombre"));
         colEdad.setCellValueFactory(new PropertyValueFactory<>("edad"));
@@ -57,18 +54,14 @@ public class MainController {
                 new SimpleStringProperty(formatearCosto(fila.getValue().calcularCostoConsulta())));
         tblMascotas.setItems(mascotasFiltradas);
 
-        // 2. Formulario: opciones del selector y campos deshabilitados al inicio
         cmbTipo.getItems().addAll("Perro", "Gato");
         cambiarTipo();
 
-        // 3. Búsqueda en tiempo real
         txtBuscar.textProperty().addListener((obs, anterior, nuevo) -> filtrar(nuevo));
 
-        // 4. Cargar datos de los archivos
         try {
-            repositorio.cargarDatos();
-            mascotas.setAll(repositorio.listar());
-            mostrarInfo("Se cargaron " + mascotas.size() + " mascotas.");
+            repositorio.cargarDatos();                          // CAMBIO: ya no se copia a otra lista
+            mostrarInfo("Se cargaron " + repositorio.getMascotas().size() + " mascotas.");
         } catch (IllegalStateException e) {
             mostrarError(e.getMessage());
         }
@@ -93,19 +86,16 @@ public class MainController {
         String textoPeso = txtPeso.getText().trim();
         String raza = txtRaza.getText().trim();
 
-        // Tipo
         if (tipo == null) {
             mostrarError("Tipo: debe seleccionar Perro o Gato.");
             return;
         }
 
-        // Nombre
         if (nombre.isEmpty()) {
             mostrarError("Nombre: no puede estar vacío.");
             return;
         }
 
-        // Edad
         int edad;
         try {
             edad = Integer.parseInt(textoEdad);
@@ -118,7 +108,6 @@ public class MainController {
             return;
         }
 
-        // Peso
         double peso;
         try {
             peso = Double.parseDouble(textoPeso.replace(',', '.'));
@@ -131,14 +120,12 @@ public class MainController {
             return;
         }
 
-        // Raza (solo perro)
         boolean esPerro = tipo.equals("Perro");
         if (esPerro && raza.isEmpty()) {
             mostrarError("Raza: no puede estar vacía.");
             return;
         }
 
-        // Todo válido: crear la mascota
         Mascota nueva;
         if (esPerro) {
             Perro perro = new Perro(nombre, edad, peso, raza, chkVacunado.isSelected());
@@ -150,14 +137,12 @@ public class MainController {
             nueva = new Gato(nombre, edad, peso, chkExterior.isSelected());
         }
 
-        // Guardar (Repository + archivos) y mostrar en la tabla
         try {
-            repositorio.agregar(nueva);
+            repositorio.agregar(nueva);                         // CAMBIO: ya no hace falta mascotas.add(...)
         } catch (IllegalStateException e) {
             mostrarError(e.getMessage());
             return;
         }
-        mascotas.add(nueva);
         mostrarExito(nueva.getNombre() + " (" + nueva.getTipo() + ") registrado correctamente.");
         limpiarFormulario();
     }
@@ -172,12 +157,11 @@ public class MainController {
         }
 
         try {
-            repositorio.eliminar(seleccionada);
+            repositorio.eliminar(seleccionada);                 // CAMBIO: ya no hace falta mascotas.remove(...)
         } catch (IllegalStateException e) {
             mostrarError(e.getMessage());
             return;
         }
-        mascotas.remove(seleccionada);
         mostrarExito(seleccionada.getNombre() + " (" + seleccionada.getTipo() + ") eliminado correctamente.");
     }
 
@@ -193,7 +177,7 @@ public class MainController {
             return nombre.contains(criterio) || tipo.contains(criterio);
         });
 
-        mostrarInfo("Mostrando " + mascotasFiltradas.size() + " de " + mascotas.size() + " mascotas.");
+        mostrarInfo("Mostrando " + mascotasFiltradas.size() + " de " + repositorio.getMascotas().size() + " mascotas.");
     }
 
     private void limpiarFormulario() {

@@ -1,6 +1,9 @@
-package cl.duoc.pataverde.dao;
+package cl.duoc.pataverde.repository;
 
+import cl.duoc.pataverde.dao.MascotaDAO;
 import cl.duoc.pataverde.model.Mascota;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,19 +11,18 @@ import java.util.List;
 public class MascotaRepository {
 
     private final MascotaDAO dao;
-    private final List<Mascota> mascotas = new ArrayList<>();
+    private final ObservableList<Mascota> mascotas = FXCollections.observableArrayList();
 
     public MascotaRepository(MascotaDAO dao) {
         this.dao = dao;
     }
 
     public void cargarDatos() {
-        mascotas.clear();
-        mascotas.addAll(dao.cargar());
+        mascotas.setAll(dao.cargar());
     }
 
-    public List<Mascota> listar() {
-        return new ArrayList<>(mascotas);
+    public ObservableList<Mascota> getMascotas() {
+        return FXCollections.unmodifiableObservableList(mascotas);
     }
 
     public void agregar(Mascota mascota) {
