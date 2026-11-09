@@ -1,0 +1,14 @@
+[
+  {
+    "exterior": true,
+    "nombre": "luna",
+    "edad": 4,
+    "peso": 5.1
+  },
+  {
+    "exterior": false,
+    "nombre": "max",
+    "edad": 2,
+    "peso": 4.2
+  }
+]

@@ -1,0 +1,10 @@
+[
+  {
+    "raza": "labrador",
+    "vacunado": true,
+    "disponibleAdopcion": true,
+    "nombre": "max",
+    "edad": 3,
+    "peso": 15.5
+  }
+]
