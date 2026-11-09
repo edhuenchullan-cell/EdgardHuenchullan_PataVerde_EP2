@@ -8,11 +8,15 @@ import java.util.List;
 public class MascotaRepository {
 
     private final MascotaDAO dao;
-    private final List<Mascota> mascotas;
+    private final List<Mascota> mascotas = new ArrayList<>();
 
     public MascotaRepository(MascotaDAO dao) {
         this.dao = dao;
-        this.mascotas = dao.cargar();
+    }
+
+    public void cargarDatos() {
+        mascotas.clear();
+        mascotas.addAll(dao.cargar());
     }
 
     public List<Mascota> listar() {
@@ -20,12 +24,16 @@ public class MascotaRepository {
     }
 
     public void agregar(Mascota mascota) {
+        List<Mascota> copia = new ArrayList<>(mascotas);
+        copia.add(mascota);
+        dao.guardar(copia);
         mascotas.add(mascota);
-        dao.guardar(mascotas);
     }
 
     public void eliminar(Mascota mascota) {
+        List<Mascota> copia = new ArrayList<>(mascotas);
+        copia.remove(mascota);
+        dao.guardar(copia);
         mascotas.remove(mascota);
-        dao.guardar(mascotas);
     }
 }

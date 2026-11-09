@@ -6,7 +6,6 @@ import cl.duoc.pataverde.model.Perro;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -14,47 +13,57 @@ import java.util.List;
 
 public class MascotaDAOJson implements MascotaDAO {
 
-    private final Path archivo = Path.of("data", "mascotas.json");
+    private final Path archivoPerros = Path.of("perros.json");
+    private final Path archivoGatos = Path.of("gatos.json");
     private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
     @Override
     public List<Mascota> cargar() {
         List<Mascota> mascotas = new ArrayList<>();
 
-        if (!Files.exists(archivo)) {
-            return mascotas;
+        try {
+            if (Files.exists(archivoPerros)) {
+                Perro[] perros = gson.fromJson(Files.readString(archivoPerros), Perro[].class);
+                if (perros != null) {
+                    for (Perro perro : perros) {
+                        mascotas.add(perro);
+                    }
+                }
+            }
+
+            if (Files.exists(archivoGatos)) {
+                Gato[] gatos = gson.fromJson(Files.readString(archivoGatos), Gato[].class);
+                if (gatos != null) {
+                    for (Gato gato : gatos) {
+                        mascotas.add(gato);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new IllegalStateException("Error al leer los archivos de datos.");
         }
 
-        try {
-            String texto = Files.readString(archivo);
-            DatosClinica datos = gson.fromJson(texto, DatosClinica.class);
-            if (datos != null) {
-                mascotas.addAll(datos.getPerros());
-                mascotas.addAll(datos.getGatos());
-            }
-        } catch (IOException e) {
-            throw new IllegalStateException("No se pudo leer el archivo de datos.", e);
-        }
         return mascotas;
     }
 
     @Override
     public void guardar(List<Mascota> mascotas) {
-        DatosClinica datos = new DatosClinica();
+        List<Perro> perros = new ArrayList<>();
+        List<Gato> gatos = new ArrayList<>();
 
         for (Mascota mascota : mascotas) {
             if (mascota instanceof Perro) {
-                datos.getPerros().add((Perro) mascota);
+                perros.add((Perro) mascota);
             } else if (mascota instanceof Gato) {
-                datos.getGatos().add((Gato) mascota);
+                gatos.add((Gato) mascota);
             }
         }
 
         try {
-            Files.createDirectories(archivo.getParent());
-            Files.writeString(archivo, gson.toJson(datos));
-        } catch (IOException e) {
-            throw new IllegalStateException("No se pudo guardar el archivo de datos.", e);
+            Files.writeString(archivoPerros, gson.toJson(perros));
+            Files.writeString(archivoGatos, gson.toJson(gatos));
+        } catch (Exception e) {
+            throw new IllegalStateException("Error al guardar los archivos de datos.");
         }
     }
 }
